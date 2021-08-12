@@ -11,6 +11,11 @@ input_path <- here::here("input")
 
 setwd(input_path)
 
+
+# Identified metadata DCT file
+metadata <- readLines("GSS.dct")
+print(metadata)
+
 # Load General Social Survey data
 GSS <-
   readr::read_fwf(
