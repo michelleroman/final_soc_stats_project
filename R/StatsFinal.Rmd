@@ -16,8 +16,12 @@ library(dplyr)
 library(pander)
 library(vcdExtra)
 library(stargazer) 
-setwd("C:/Users/mara1/Downloads/Soc_stats")
+
+input_path <- here::here("output")
+setwd(input_path)
+
 gss <- read.csv("final.csv")
+
 ```
 ```{r, include = FALSE}
 mean(gss$helpsick, na.rm = TRUE)
