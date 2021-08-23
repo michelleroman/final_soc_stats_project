@@ -16,8 +16,7 @@ setwd(input_path)
 metadata <- readLines("GSS.dct")
 print(metadata)
 
-# Load General Social Survey data
-# WE are pulling the entire dataset going back to 1972
+# Load General Social Survey data and simplify column names
 raw_df <-
   readr::read_fwf("GSS.dat",
                   col_positions = fwf_positions(
@@ -27,8 +26,19 @@ raw_df <-
                   )) %>%
   janitor::clean_names()
 
-## Review distribution of responses
+# This question was asked in 1975, 1983, 1984, 1986-Present
+# Limit the data to when the question was asked
 
+table(raw_df$year, exclude = NULL)
+
+raw_df <- raw_df %>%
+  filter(year == 1975 |
+           between(year, 1983, 1984) |
+           between(year, 1986, 2016))
+
+table(raw_df$year, exclude = NULL)
+
+## Review distribution of responses
 #Subjective class identification
 ggplot2::ggplot(data = raw_df) +
   ggplot2::geom_bar(mapping = aes(x = class))
@@ -37,10 +47,9 @@ ggplot2::ggplot(data = raw_df) +
 ggplot2::ggplot(data = raw_df) +
   ggplot2::geom_bar(mapping = aes(x = health))
 
-#Should govt help pay for medical care
+#Should govt help pay for medical care, or should people take care of themselves?
 ggplot2::ggplot(data = raw_df) +
   ggplot2::geom_bar(mapping = aes(x = helpsick))
-
 
 ## We want to ensure that we have enough of a sample size to
 ## draw conclusions around the relationships between these
@@ -52,12 +61,9 @@ ggplot2::ggplot(data = raw_df) +
 
 # Recode outliers and null values
 df <- raw_df %>%
-  mutate(class = dplyr::if_else((class >= 5 |
-                                   class == 0), NA_real_, class)) %>%
-  mutate(health = dplyr::if_else((health >= 8 |
-                                    health == 0), NA_real_, health)) %>%
-  mutate(helpsick = dplyr::if_else((helpsick >= 8 |
-                                      helpsick == 0), NA_real_, helpsick))
+  mutate(class = dplyr::if_else((class >= 5 | class == 0), NA_real_, class)) %>%
+  mutate(health = dplyr::if_else((health >= 8 | health == 0), NA_real_, health)) %>%
+  mutate(helpsick = dplyr::if_else((helpsick >= 8 | helpsick == 0), NA_real_, helpsick))
 
 ## Review distribution of cleaned responses
 ggplot2::ggplot(data = df) +
@@ -90,21 +96,15 @@ df <- df %>%
         "Fair" = "3",
         "Poor" = "4"
       )
-  )                     
-    
-## ERROR: the below code didn't relabel anything 
-## and there are too few labels for the values present. 
-## We also only need the numeric values for analysis. 
-#GSS$helpsick[GSS$helpsick=="Government help"]<-1
+  ) 
 
-
-table(GSS$class, exclude= NULL)
-table(GSS$health, exclude= NULL)
-table(GSS$helpsick, exclude= NULL)
+table(df$class, exclude= NULL)
+table(df$health, exclude= NULL)
+table(df$helpsick, exclude= NULL)
 
 ## Export final data file
 output_path <- here::here("output") 
   
-write.csv(GSS, output_path, "final.csv")
+write.csv(df, paste0(output_path, "/new_final.csv"))
 
 
