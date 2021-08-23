@@ -22,10 +22,10 @@ I propose that the health of the respondent would necessarily effect how high th
 A working-class respondent then, could be in excellent health and believe that the government should assist with medical care, while an upper-class respondent with poor health and high medical bills wouldn’t necessarily think the government should help possibly because they have the resources to take care it themselves. 
 
 # Methodology
- ## Include the background behind the orgins of the questions and how they may have changed overtime
+ ## Include the background behind the origins of the questions and how they may have changed overtime
  ## Include any limitations to the data that we can think of
  ## Include any biases that you might bring to the data
 
 
 # Acknowledgements
-GSS file conversion script was provided by the course instructor. READ.me organization was from [this template](https://www.makeareadme.com/). 
+READ.me organization was from [this template](https://www.makeareadme.com/). 
