@@ -85,7 +85,11 @@ df <- df %>%
         "Working" = "2",
         "Middle" = "3",
         "Upper" = "4"
-      )
+      ) %>%
+      forcats::fct_relevel("Lower",
+                           "Working",
+                           "Middle",
+                           "Upper")
   ) %>%
   
   dplyr::mutate(
@@ -95,7 +99,11 @@ df <- df %>%
         "Good" = "2",
         "Fair" = "3",
         "Poor" = "4"
-      )
+      ) %>%
+      forcats::fct_relevel("Excellent",
+                           "Good",
+                           "Fair",
+                           "Poor")
   ) 
 
 table(df$class, exclude= NULL)

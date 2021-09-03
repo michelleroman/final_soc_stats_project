@@ -1,7 +1,6 @@
 ---
 title: "New_StatsFinal"
 author: "Michelle Roman"
-date: "8/23/2021"
 output:
   pdf_document: default
   html_notebook: default
@@ -13,7 +12,7 @@ What is the relationship between self-reported health, class and the continuous 
 
 I propose that the health of the respondent would necessarily effect how high their medical bills are and consequently they might be more likely to support more government medical assistance. As such they should be negatively correlated, as the quality of the health of the respondent increases the belief in government assistance from medical care should decrease. The control variable class relates this association in that the extremes of the income brackets could have set views on how the government should be assisting citizens with medical bills despite their own health. A working-class respondent then, could be in excellent health and believe that the government should assist with medical care, while an upper-class respondent with poor health and high medical bills wouldn't necessarily think the government should help possibly because they have the resources to take care it themselves.
 
-I'll be using the full set of observations from 1972-2016 and I've excluded all missing values from each variable in my analysis. The audience for this report is all professionals involved in public health policy.
+I'll be using the full set of observations from 1972-2016 and I've excluded all missing values from each variable in my analysis. 
 
 
 ```{r, load_libraries, include = FALSE, warning = FALSE}
@@ -28,7 +27,7 @@ library(stargazer)
 input_path <- here::here("output")
 setwd(input_path)
 
-gss <- read.csv("new_final.csv")
+df <- read.csv("new_final.csv")
 
 ```
 
@@ -37,11 +36,34 @@ The helpsick variable has a normal distribution for each possible response, with
 
 
 ```{r, descriptive_stats, include = FALSE}
-mean(gss$helpsick, na.rm = TRUE)
-sd(gss$helpsick, na.rm = TRUE)
+mean(df$helpsick, na.rm = TRUE)
+sd(df$helpsick, na.rm = TRUE)
 
-table(gss$health)
-round(prop.table(table(gss$health)),3)
+
+##Not organized by factor!
+#Explore class
+ggplot2::ggplot(data = df) +
+  ggplot2::geom_bar(mapping = aes(x = class))
+
+
+#Explore helpsick
+ggplot2::ggplot(data = df) +
+  ggplot2::geom_bar(mapping = aes(x = helpsick))
+
+
+#Explore health
+df %>%
+  dplyr::group_by(health) %>%
+  dplyr::summarize(n = n()) %>%
+  dplyr::mutate(freq = n / sum(n))
+
+
+helpsick_dist_plot <-
+  ggplot2::ggplot(data = df, mapping = aes(helpsick)) +
+  ggplot2::geom_bar()
+
+helpsick_dist_plot + ggplot2::facet_grid(cols = vars(health))
+
 
 ```
 
@@ -49,11 +71,11 @@ round(prop.table(table(gss$health)),3)
 1. This plot shows the mean responses for the helpsick question on a scale of 1-5, one being the government should help pay for medical expenses, three being agree with both, and 5 being people should take care of their own medical expenses. These means are then organized by the level of health that was self-reported by participants, ranging from Excellent to Poor. There is not a wide range of means responses for this question when self-reported health is brought into the discussion, which means there is possibly another factor that can help explain this lack of diversity across health status.
 
 ```{r, health_helpsick_plot, echo=FALSE}
-health_helpsick_plot <-  gss %>% 
+health_helpsick_plot <-  df %>% 
                         group_by(health) %>% 
                summarize(mean_helpsick = round(mean(helpsick, na.rm = TRUE), 3))
 
-mean_helpsick <- round(mean(gss$helpsick, na.rm = TRUE), 3)
+mean_helpsick <- round(mean(df$helpsick, na.rm = TRUE), 3)
 
 colnames(health_helpsick_plot) <- c("Health", "Mean Responses for Helpsick")
 
@@ -74,18 +96,18 @@ health_plot + geom_col() + geom_text(aes(label = round(mean_helpsick, 2), vjust 
 
 ```{r,echo=FALSE}
 
-gss$disagree<-(gss$helpsick>=4)
-prop.table(table(gss$disagree))
+df$disagree<-(df$helpsick>=4)
+prop.table(table(df$disagree))
 
-gss$excellent<-(gss$health=="Excellent"|gss$helpsick==1)
-prop.table(table(gss$excellent))
+df$excellent<-(df$health=="Excellent"|df$helpsick==1)
+prop.table(table(df$excellent))
 ```
 
 3. I've also created a variable called excellent that only includes those who self-report having excellent health yet still believe that the government should help pay for medical expenses. 71% of the respondents in this sample fit into this category. Suggesting that my earlier hypotheses that personal medical conditions played a large role in this story, is true however it skewed opposite to my prediction. 
 
 ```{r,include=FALSE, echo=FALSE}
 
-round(prop.table(table(gss$disagree,gss$excellent,gss$class),2),4)
+round(prop.table(table(df$disagree,df$excellent,df$class),2),4)
 
 
 ```
@@ -98,11 +120,11 @@ The null hypothesis is that self-reported health and responses to the helpsick q
 
 
 ```{r,echo=FALSE}
-t.test(gss$helpsick[gss$health=="Excellent"],gss$helpsick[gss$health=="Poor"])
+t.test(df$helpsick[df$health=="Excellent"],df$helpsick[df$health=="Poor"])
 ```
 
 ```{r, include=FALSE, echo=FALSE}
-helpsick_class_table<- table(gss$helpsick, gss$class)
+helpsick_class_table<- table(df$helpsick, df$class)
 GKgamma(helpsick_class_table)
 
 -0.028/.008
@@ -113,9 +135,9 @@ Then I used the Gamma Test to determent whether these ordered variables were ind
 
 ## Regression
 ```{r, include=FALSE, echo=FALSE}
-helpsickXclass_model<-lm(helpsick~health*class,data=gss)
-helpsick_health_class_model<-lm(helpsick~health+class,data=gss)
-helpsick_health_model<-lm(helpsick~health,data=gss)
+helpsickXclass_model<-lm(helpsick~health*class,data=df)
+helpsick_health_class_model<-lm(helpsick~health+class,data=df)
+helpsick_health_model<-lm(helpsick~health,data=df)
 ```
 
 ```{r, results = "asis", echo = FALSE, warning = FALSE}
